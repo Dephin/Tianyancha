@@ -8,12 +8,13 @@ import hashlib
 import time
 
 from bs4 import BeautifulSoup
-from config import decrypt_dict
+from mysql import Mysql
+from config import db_conf
 
 
 class Scrawler(object):
     """docstring for  Scrawler"""
-    def __init__(self, user='', passwd='', cookie='', decrypt_dict=decrypt_dict):
+    def __init__(self, user='', passwd='', cookie=''):
         self.session = requests.session()
         self.session.headers = {
             'Host': 'www.tianyancha.com',
@@ -26,9 +27,9 @@ class Scrawler(object):
             'Accept-Language': 'zh-CN,zh;q=0.9',
             'cookie': cookie
         }
-        self.decrypt_dict = decrypt_dict
         self.soup = None
         self.url_id = None
+        self.decrypt_type, self.decrypt_dict = self.load_dict()
 
 
     def parse_urls(self, page_no):
@@ -51,9 +52,9 @@ class Scrawler(object):
         return urls
 
 
-    def decrypt(self, encrypt_type, encrypt_str):
+    def decrypt(self, encrypt_str):
         result = ''
-        dict = decrypt_dict[encrypt_type]
+        dict = self.decrypt_dict
         for s in encrypt_str:
             if s in dict:
                 result += dict[s]
@@ -70,7 +71,7 @@ class Scrawler(object):
 
     def parse_company_info(self):
         encrypt_type = self.soup.body['class'][0]
-        if encrypt_type in self.decrypt_dict:
+        if encrypt_type in self.decrypt_type:
             pass
         else:
             raise Exception
@@ -90,8 +91,8 @@ class Scrawler(object):
         if company_info2:
             registration_time = company_info2[1].get_text()
             registered_capital = company_info2[0].get_text()
-            registration_time = self.decrypt(encrypt_type, registration_time)
-            registered_capital = self.decrypt(encrypt_type, registered_capital)
+            registration_time = self.decrypt(registration_time)
+            registered_capital = self.decrypt(registered_capital)
             company_status = company_info2[2].get_text()
         else:
             registration_time = '暂无信息'
@@ -104,7 +105,7 @@ class Scrawler(object):
 
     def parse_corporate_info(self):
         encrypt_type = self.soup.body['class'][0]
-        if encrypt_type in self.decrypt_dict:
+        if encrypt_type in self.decrypt_type:
             pass
         else:
             raise Exception
@@ -149,7 +150,7 @@ class Scrawler(object):
 
     def parse_finacing_info(self):
         encrypt_type = self.soup.body['class'][0]
-        if encrypt_type in self.decrypt_dict:
+        if encrypt_type in self.decrypt_type:
             pass
         else:
             raise Exception
@@ -180,3 +181,57 @@ class Scrawler(object):
             data.append([self.url_id, company_name, '-', '-', '-', '-', '-'])
 
         return data
+
+
+    # def reset_dict(decrypr_type):
+    #     links = self.soup.head.link
+    #     for lnk in links:
+    #         if 'font.css' in lnk['href']:
+    #             woff_ = re.search(r"url\('(.*\.woff)'\)", response_index).group(1)
+    #             break
+
+    #     if not url:
+    #         raise Exception
+
+        # 获取字体文件的url
+        # woff_ = re.search(r"url\('(.*\.woff)'\)", response_index).group(1)
+        # woff_url = 'http:' + woff_
+        # response_woff = requests.get(woff_url, headers=headers).content
+
+        # with open('fonts.woff', 'wb') as f:
+        #     f.write(response_woff)
+
+        # fonts = TTFont('tyc-num.woff')
+
+        # temp = [i for i in range(0, 10)]
+        # dict = [['de_code', 'co_code'], [decrypr_type, 'type']]
+
+        # for glyph_id in range(2, 11):
+        #     glyph_name = fonts.getGlyphName(glyph_id)
+        #     dict.append([glyph_id-2, int(glyph_name)])
+        #     temp.remove(int(glyph_name))
+
+        # x = temp[0]
+
+        # for i in range(2, len(dict)):
+        #     if dict[i][0] >= x:
+        #         dict[i][0] += 1
+
+        # dict.append([x, x])
+
+        # db = Mysql(**db_conf)
+        # db.update('TRUNCATE TABLE dict;')
+        # db.insert('dict', dict)
+
+
+
+    def load_dict(self):
+        db = Mysql(**db_conf)
+        decrypr_type = db.select("SELECT de_code FROM dict WHERE co_code='type';")[1][0]
+        data = db.select("SELECT co_code,de_code FROM dict WHERE co_code<>'type';")
+        dict = {}
+
+        for i in range(1, len(data)):
+            dict[data[i][0]] = data[i][1]
+
+        return decrypr_type, dict
