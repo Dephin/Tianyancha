@@ -70,11 +70,11 @@ class Scrawler(object):
 
 
     def parse_company_info(self):
-        encrypt_type = self.soup.body['class'][0]
-        if encrypt_type in self.decrypt_type:
-            pass
-        else:
-            raise Exception
+        # encrypt_type = self.soup.body['class'][0]
+        # if encrypt_type in self.decrypt_type:
+        #     pass
+        # else:
+        #     raise Exception
 
         data = [['url_id', 'company_name', 'company_address', 'company_intro', 'company_status']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
@@ -104,11 +104,11 @@ class Scrawler(object):
 
 
     def parse_corporate_info(self):
-        encrypt_type = self.soup.body['class'][0]
-        if encrypt_type in self.decrypt_type:
-            pass
-        else:
-            raise Exception
+        # encrypt_type = self.soup.body['class'][0]
+        # if encrypt_type in self.decrypt_type:
+        #     pass
+        # else:
+        #     raise Exception
 
         data = [['url_id', 'corporate_name', 'company_role', 'company_name', 'company_province', 'company_date', 'company_capital', 'company_status']]
         corporate_info = self.soup.find('div', attrs={'class': 'human-top'})
@@ -149,11 +149,12 @@ class Scrawler(object):
 
 
     def parse_finacing_info(self):
-        encrypt_type = self.soup.body['class'][0]
-        if encrypt_type in self.decrypt_type:
-            pass
-        else:
-            raise Exception
+        # encrypt_type = self.soup.body['class'][0]
+        # if encrypt_type in self.decrypt_type:
+        #     pass
+        # else:
+        #     raise Exception
+        
         data = [['url_id', 'company_name', 'finacing_time', 'turn', 'appraisement', 'capital', 'propertion', 'invenstors']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
         company_name = header.h1.get_text()
