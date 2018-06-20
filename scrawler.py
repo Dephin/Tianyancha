@@ -29,7 +29,7 @@ class Scrawler(object):
         }
         self.soup = None
         self.url_id = None
-        self.decrypt_type, self.decrypt_dict = self.load_dict()
+        # self.decrypt_type, self.decrypt_dict = self.load_dict()
 
 
     def parse_urls(self, page_no):
@@ -52,15 +52,15 @@ class Scrawler(object):
         return urls
 
 
-    def decrypt(self, encrypt_str):
-        result = ''
-        dict = self.decrypt_dict
-        for s in encrypt_str:
-            if s in dict:
-                result += dict[s]
-            else:
-                result += s
-        return result
+    # def decrypt(self, encrypt_str):
+    #     result = ''
+    #     dict = self.decrypt_dict
+    #     for s in encrypt_str:
+    #         if s in dict:
+    #             result += dict[s]
+    #         else:
+    #             result += s
+    #     return result
 
 
     def parse_url_content(self, url, url_id):
@@ -76,7 +76,7 @@ class Scrawler(object):
         else:
             raise Exception
 
-        data = [['url_id', 'company_name', 'company_address', 'company_intro', 'registration_time', 'registered_capital', 'company_status']]
+        data = [['url_id', 'company_name', 'company_address', 'company_intro', 'company_status']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
         company_name = header.h1.get_text()
         company_info = header.find_all('div', attrs={'class': ['f14', 'sec-c2']})
@@ -89,17 +89,17 @@ class Scrawler(object):
 
         company_info2 = self.soup.find_all('div', attrs={'class': 'baseinfo-module-content-value'})
         if company_info2:
-            registration_time = company_info2[1].get_text()
-            registered_capital = company_info2[0].get_text()
-            registration_time = self.decrypt(registration_time)
-            registered_capital = self.decrypt(registered_capital)
+            # registration_time = company_info2[1].get_text()
+            # registered_capital = company_info2[0].get_text()
+            # registration_time = self.decrypt(registration_time)
+            # registered_capital = self.decrypt(registered_capital)
             company_status = company_info2[2].get_text()
         else:
-            registration_time = '暂无信息'
-            registered_capital = '暂无信息'
+            # registration_time = '暂无信息'
+            # registered_capital = '暂无信息'
             company_status = '暂无信息'
 
-        data.append([self.url_id, company_name, company_address, company_intro, registration_time, registered_capital, company_status])
+        data.append([self.url_id, company_name, company_address, company_intro, company_status])
         return data
 
 
@@ -119,7 +119,7 @@ class Scrawler(object):
             corporate_name = corporate_info.get_text()
             corporate_link = corporate_info['href']
         
-            time.sleep(1)
+            time.sleep(2)
             resp = self.session.get(corporate_link)
             
             corporate_soup = BeautifulSoup(resp.content)
@@ -154,7 +154,7 @@ class Scrawler(object):
             pass
         else:
             raise Exception
-        data = [['url_id', 'company_name', 'finacing_time', 'turn', 'appraisement', 'propertion', 'invenstors']]
+        data = [['url_id', 'company_name', 'finacing_time', 'turn', 'appraisement', 'capital', 'propertion', 'invenstors']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
         company_name = header.h1.get_text()
         finacing_link = header.contents[2]
@@ -171,14 +171,15 @@ class Scrawler(object):
                     finacing_time = tr.contents[1].get_text()
                     turn = tr.contents[2].get_text()
                     appraisement = tr.contents[3].get_text()
-                    propertion = appraisement = tr.contents[4].get_text()
-                    invenstors = tr.contents[5].get_text()
-                    data.append([self.url_id, company_name, finacing_time, turn, appraisement, propertion, invenstors])
+                    capital = tr.contents[4].get_text()
+                    propertion = tr.contents[5].get_text()
+                    invenstors = tr.contents[6].get_text()
+                    data.append([self.url_id, company_name, finacing_time, turn, appraisement, capital, propertion, invenstors])
 
             else:
-                data.append([self.url_id, company_name, '-', '-', '-', '-', '-'])   
+                data.append([self.url_id, company_name, '-', '-', '-', '-', '-', '-'])   
         else:
-            data.append([self.url_id, company_name, '-', '-', '-', '-', '-'])
+            data.append([self.url_id, company_name, '-', '-', '-', '-', '-', '-'])
 
         return data
 
@@ -225,13 +226,13 @@ class Scrawler(object):
 
 
 
-    def load_dict(self):
-        db = Mysql(**db_conf)
-        decrypr_type = db.select("SELECT de_code FROM dict WHERE co_code='type';")[1][0]
-        data = db.select("SELECT co_code,de_code FROM dict WHERE co_code<>'type';")
-        dict = {}
+    # def load_dict(self):
+    #     db = Mysql(**db_conf)
+    #     decrypr_type = db.select("SELECT de_code FROM dict WHERE co_code='type';")[1][0]
+    #     data = db.select("SELECT co_code,de_code FROM dict WHERE co_code<>'type';")
+    #     dict = {}
 
-        for i in range(1, len(data)):
-            dict[data[i][0]] = data[i][1]
+    #     for i in range(1, len(data)):
+    #         dict[data[i][0]] = data[i][1]
 
-        return decrypr_type, dict
+    #     return decrypr_type, dict
