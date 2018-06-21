@@ -70,11 +70,11 @@ class Mysql(object):
                     # print("(%d/%d) data prepared" % (i, nrows))
                 insert_sql = insert_sql[:-1] + ";"
 
-                print("Inserting data...")
+                # print("Inserting data...")
                 self.cur.execute(insert_sql)
                 self.conn.commit()
                 self._rebuild_cur()
-                print('Compeleted.')
+                # print('Compeleted.')
 
             except Exception as e:
                 self.conn.rollback()
@@ -114,11 +114,11 @@ class Mysql(object):
 
     def update(self, sql):
         try:
-            print("Updating data...")
+            # print("Updating data...")
             self.cur.execute(sql)
             self.conn.commit()
             self._rebuild_cur()
-            print('Compeleted.')
+            # print('Compeleted.')
         except Exception as e:
             self.conn.rollback()
             print("[ERROR] %s" % e)

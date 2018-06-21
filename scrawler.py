@@ -5,7 +5,6 @@ import requests
 import urllib
 import json
 import hashlib
-import random
 
 from bs4 import BeautifulSoup
 
@@ -25,23 +24,26 @@ class Scrawler(object):
             'Accept-Language': 'zh-CN,zh;q=0.9',
         }
         self.cookies = cookies
+        self.cookie_index = 0
         self.soup = None
         self.url_id = None
         self.proxies = proxies
+        self.proxy_index = 0
 
 
     def set_proxy(self):
-        proxy = random.choice(self.proxies)
+        proxy = self.proxies[self.proxy_index]
         self.session.proxies = { 'https': proxy }
-        print("Set Proxy: https %s" % proxy)
-
+        print("Set Proxy: HTTPS %s" % proxy)
+        self.proxy_index = (self.proxy_index + 1) % (len(self.proxies))
+        
 
     def set_cookie(self):
-        index = random.randint(0, len(self.cookies)-1)
-        cookie = self.cookies[index]
+        cookie = self.cookies[self.cookie_index]
         self.session.headers['cookie'] = cookie
-        print("Set Cookie: No.%d" % index)
-
+        print("Set Cookie: No.%d" % (self.cookie_index + 1))
+        self.cookie_index = (self.cookie_index + 1) % (len(self.cookies))
+        
 
     def parse_urls(self, page_no):
         if page_no == 1:
@@ -64,7 +66,7 @@ class Scrawler(object):
 
 
     def parse_url_content(self, url, url_id):
-        print('Parse Url Content: %s' % url)
+        print('Parsing Url Content: %s' % url)
         self.set_proxy()
         self.set_cookie()
         resp = self.session.get(url)
@@ -73,7 +75,7 @@ class Scrawler(object):
 
 
     def parse_company_info(self):
-        print('Parse Company Info')
+        print('Parsing: Company Info')
         data = [['url_id', 'company_name', 'company_address', 'company_intro', 'company_status']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
         company_name = header.h1.get_text()
@@ -97,7 +99,7 @@ class Scrawler(object):
 
 
     def parse_corporate_info(self):
-        print('Parse Corporate Info')
+        print('Parsing: Corporate Info')
         data = [['url_id', 'corporate_name', 'company_role', 'company_name', 'company_province', 'company_date', 'company_capital', 'company_status']]
         corporate_info = self.soup.find('div', attrs={'class': 'human-top'})
 
@@ -107,10 +109,7 @@ class Scrawler(object):
             corporate_name = corporate_info.get_text()
             corporate_link = corporate_info['href']
         
-            self.set_proxy()
-            self.set_cookie()
             resp = self.session.get(corporate_link)
-            
             corporate_soup = BeautifulSoup(resp.content)
             companies = corporate_soup.find('div', attrs={'id': '_container_syjs'}).table.tbody.find_all('tr')
 
@@ -138,7 +137,7 @@ class Scrawler(object):
 
 
     def parse_finacing_info(self):   
-        print('Parse Finacing Info')
+        print('Parsing: Finacing Info')
         data = [['url_id', 'company_name', 'finacing_time', 'turn', 'appraisement', 'capital', 'propertion', 'invenstors']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
         company_name = header.h1.get_text()
@@ -146,9 +145,6 @@ class Scrawler(object):
 
         if finacing_link.contents:
             finacing_link = finacing_link.a['href']
-
-            self.set_proxy()
-            self.set_cookie()
             resp = self.session.get(finacing_link)
 
             finacing_soup = BeautifulSoup(resp.content)
