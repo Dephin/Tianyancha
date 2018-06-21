@@ -16,7 +16,7 @@ web_conf = {
 db_conf = {
 	'host': '127.0.0.1',
 	'user': 'root',
-	'passwd': '2828346',
+	'passwd': '',
 	'charset': 'utf8',
 	'db': 'tianyancha'
 }
