@@ -31,14 +31,12 @@ def save_contents(n, period):
 		url_id = data[1][0]
 		url = data[1][1]
 		scrawler.parse_url_content(url, url_id)
-		print(url)
-		time.sleep(2)
 		company_data = scrawler.parse_company_info()
-		time.sleep(4)
+		time.sleep(2)
 		corporate_data = scrawler.parse_corporate_info()
 		time.sleep(2)
 		finacing_data = scrawler.parse_finacing_info()
-		time.sleep(10)
+		time.sleep(2)
 
 		if (len(company_data) > 1) and (len(corporate_data) > 1) and (len(finacing_data) > 1):
 			db.update('DELETE FROM company_info WHERE url_id=%d;' % url_id)
@@ -54,7 +52,22 @@ def save_contents(n, period):
 		if count == n:
 			time.sleep(period)
 
+
+def test():
+	db = Mysql(**db_conf)
+	scrawler = Scrawler(**web_conf)
+
+	data = db.select("SELECT url_id,url FROM urls WHERE flag=0 ORDER BY url_id LIMIT 1;")
+	url_id = data[1][0]
+	url = data[1][1]
+	scrawler.p_parse_url_content(url, url_id)
+	print(url)
+	company_data = scrawler.p_parse_company_info()
+	print(scrawler.session.proxies)
+
+
+
 if __name__ == '__main__':
-	save_contents(30, 30)
+	save_contents(20, 30)
 
 
