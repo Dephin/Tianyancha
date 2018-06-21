@@ -34,11 +34,11 @@ def save_contents(n, period):
 		print(url)
 		time.sleep(2)
 		company_data = scrawler.parse_company_info()
-		time.sleep(2)
+		time.sleep(4)
 		corporate_data = scrawler.parse_corporate_info()
 		time.sleep(2)
 		finacing_data = scrawler.parse_finacing_info()
-		time.sleep(2)
+		time.sleep(10)
 
 		if (len(company_data) > 1) and (len(corporate_data) > 1) and (len(finacing_data) > 1):
 			db.update('DELETE FROM company_info WHERE url_id=%d;' % url_id)
