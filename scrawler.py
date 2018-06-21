@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 class Scrawler(object):
     """docstring for  Scrawler"""
-    def __init__(self, user='', passwd='', cookie='', proxies=[]):
+    def __init__(self, user='', passwd='', cookies='', proxies=[]):
         self.session = requests.session()
         self.session.headers = {
             'Host': 'www.tianyancha.com',
@@ -23,17 +23,24 @@ class Scrawler(object):
             'Referer': 'https://www.tianyancha.com/',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
-            'cookie': cookie
         }
+        self.cookies = cookies
         self.soup = None
         self.url_id = None
         self.proxies = proxies
 
 
-    def get_proxy(self):
+    def set_proxy(self):
         proxy = random.choice(self.proxies)
         self.session.proxies = { 'https': proxy }
-        print("Choose Proxy: https %s" % proxy)
+        print("Set Proxy: https %s" % proxy)
+
+
+    def set_cookie(self):
+        index = random.randint(0, len(self.cookies)-1)
+        cookie = self.cookies[index]
+        self.session.headers['cookie'] = cookie
+        print("Set Cookie: No.%d" % index)
 
 
     def parse_urls(self, page_no):
@@ -58,7 +65,8 @@ class Scrawler(object):
 
     def parse_url_content(self, url, url_id):
         print('Parse Url Content: %s' % url)
-        self.get_proxy()
+        self.set_proxy()
+        self.set_cookie()
         resp = self.session.get(url)
         self.soup = BeautifulSoup(resp.content)
         self.url_id = url_id
@@ -99,6 +107,8 @@ class Scrawler(object):
             corporate_name = corporate_info.get_text()
             corporate_link = corporate_info['href']
         
+            self.set_proxy()
+            self.set_cookie()
             resp = self.session.get(corporate_link)
             
             corporate_soup = BeautifulSoup(resp.content)
@@ -136,7 +146,11 @@ class Scrawler(object):
 
         if finacing_link.contents:
             finacing_link = finacing_link.a['href']
+
+            self.set_proxy()
+            self.set_cookie()
             resp = self.session.get(finacing_link)
+
             finacing_soup = BeautifulSoup(resp.content)
             finacing_info = finacing_soup.find('div', attrs={'id': '_container_rongzi'})
             if finacing_info:

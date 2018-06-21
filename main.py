@@ -48,6 +48,7 @@ def save_contents(n, period):
 			db.update("UPDATE urls SET flag=1 WHERE url_id=%s" % url_id)
 
 		count += 1
+		print('%d Rows Info Done' % count)
 
 		if count == n:
 			time.sleep(period)
