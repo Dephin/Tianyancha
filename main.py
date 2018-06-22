@@ -38,7 +38,7 @@ def save_contents(period):
 			try:
 				scrawler.parse_url_content(url, url_id)
 				company_data = scrawler.parse_company_info()
-				time.sleep(2)
+				time.sleep(1)
 				break
 			except:
 				print("Connection refused by the server..")
@@ -51,7 +51,7 @@ def save_contents(period):
 		while True:
 			try:
 				corporate_data = scrawler.parse_corporate_info()
-				time.sleep(2)
+				time.sleep(1)
 				break
 			except:
 				print("Connection refused by the server..")
@@ -64,7 +64,7 @@ def save_contents(period):
 		while True:
 			try:
 				finacing_data = scrawler.parse_finacing_info()
-				time.sleep(2)
+				time.sleep(1)
 				break
 			except:
 				print("Connection refused by the server..")
@@ -105,12 +105,7 @@ def test():
 
 	count = 1
 	error_num = 0
-	req_num = 0
 	for i in range(0, 1000):
-		if req_num >= 15:
-			scrawler.set_proxy()
-			req_num = 0
-
 		print('Task: No.%d' % count)
 		print()
 
@@ -122,7 +117,7 @@ def test():
 			try:
 				scrawler.parse_url_content(url, url_id)
 				company_data = scrawler.parse_company_info()
-				# time.sleep(1)
+				time.sleep(1)
 				break
 			except:
 				error_num += 1
@@ -141,7 +136,7 @@ def test():
 		while True:
 			try:
 				corporate_data = scrawler.parse_corporate_info()
-				# time.sleep(1)
+				time.sleep(1)
 				break
 			except:
 				error_num += 1
@@ -160,7 +155,7 @@ def test():
 		while True:
 			try:
 				finacing_data = scrawler.parse_finacing_info()
-				# time.sleep(1)
+				time.sleep(1)
 				break
 			except:
 				error_num += 1
@@ -192,8 +187,6 @@ def test():
 			print()
 			print('----------------------------------------------------------------------')
 			count += 1
-
-		req_num += 3	
 
 
 
