@@ -13,9 +13,7 @@ class Scrawler(object):
     """docstring for  Scrawler"""
     def __init__(
         self,
-        user='',
-        passwd='',
-        cookie='',
+        cookies={},
         proxy_host="", 
         proxy_port="", 
         proxy_user="", 
@@ -32,12 +30,14 @@ class Scrawler(object):
             'Referer': 'https://www.tianyancha.com/',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
-            'cookie': cookie
         }
         self.soup = None
         self.url_id = None
         self.proxies = None
+        self.cookies = cookies
+        self.cookie_num = 0
         self.set_proxy()
+        self.set_cookie()
 
 
     def set_proxy(self):
@@ -62,18 +62,25 @@ class Scrawler(object):
             raise Exception
 
 
+    def set_cookie(self):
+        self.headers['cookie'] = self.cookies[self.cookie_num]
+        self.cookie_num += 1
+        if self.cookie_num >= len(self.cookies):
+            self.cookie_num = 0
+
+
     def get_current_ip(self):
         url = "https://httpbin.org/ip"
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36',
         }
-        resp = requests.get(url, headers=headers, proxies=self.proxies)
+        resp = requests.get(url, headers=headers, proxies=self.proxies, timeout=10)
         print("Connect: Current IP %s" % resp.text.strip())
         return resp
 
 
     def req_get(self, url):
-        resp = self.session.get(url, headers=self.headers, proxies=self.proxies)
+        resp = self.session.get(url, headers=self.headers, proxies=self.proxies, timeout=10)
         return resp
 
 
