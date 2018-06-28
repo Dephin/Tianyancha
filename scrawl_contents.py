@@ -9,11 +9,12 @@ import hashlib
 from bs4 import BeautifulSoup
 
 
-class Scrawler(object):
+class ScrawlContents(object):
     """docstring for  Scrawler"""
     def __init__(
         self,
-        cookies=""
+        cookie="",
+        proxies={}
     ):
         self.session = requests.session()
         # self.session.keep_alive = False
@@ -30,87 +31,28 @@ class Scrawler(object):
         }
         self.soup = None
         self.url_id = None
-        self.proxies = None
-        self.set_proxy()
+        self.proxies = proxies 
 
-
-    scrawler_num = 0
-
+    SCRAWLER_NUM = 0
 
     @classmethod
-    def build_scrawler(cls, cookies):
-        s = cls(cookies[cls.scrawler_num])
-        cls.scrawler_num += 1
+    def build(cls, cookie, proxies):
+        s = cls(cookies, proxies)
+        cls.SCRAWLER_NUM += 1
         return s
-
-
-    def set_proxy(self):
-        url = "http://piping.mogumiao.com/proxy/api/get_ip_al?appKey=3873239366fb4548a227fcbf310862ba&count=1&expiryDate=0&format=1&newLine=2"
-        resp = self.session.get(url)
-        if resp.status_code == 200:
-            resp_json = json.loads(resp.text)
-            proxy_ip = resp_json['msg'][0]['ip']
-            proxy_port = resp_json['msg'][0]['port']
-            proxy_meta = "%(ip)s:%(port)s" % {
-                "ip" : proxy_ip,
-                "port" : proxy_port,
-            }
-            proxies = {
-                "http"  : "http://" + proxy_meta,
-                "https" : "https://" + proxy_meta,
-            }
-            self.proxies = proxies
-            print("Connect: Set Proxy %s" % proxy_meta)
-            print()
-        else:
-            raise Exception
-
-
-    # def set_cookie(self):
-    #     self.headers['cookie'] = self.cookies[Scrawler.scrawler_num]
-    #     Scrawler.scrawler_num += 1
-    #     if Scrawler.scrawler_num >= len(self.cookies):
-    #         Scrawler.scrawler_num = 0
 
     def set_cookie(self, cookie):
         self.headers['cookie'] = cookie
 
-
-    def get_current_ip(self):
-        url = "https://httpbin.org/ip"
-        headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36',
-        }
-        resp = requests.get(url, headers=headers, proxies=self.proxies, timeout=10)
-        print("Connect: Current IP %s" % resp.text.strip())
-        return resp
-
+    def set_proxies(self, proxies):
+        self.proxies = proxies
 
     def req_get(self, url):
         resp = requests.get(url, headers=self.headers, proxies=self.proxies, timeout=10)
         return resp
 
 
-    def parse_urls(self, page_no):
-        if page_no == 1:
-            url = "https://www.tianyancha.com/search?key=%E7%A7%91%E6%8A%80%E9%87%91%E8%9E%8D"
-        else:
-            url = "https://www.tianyancha.com/search/p" + str(page_no) + "?key=%E7%A7%91%E6%8A%80%E9%87%91%E8%9E%8D"
-
-        resp = self.session.get(url)
-
-        urls_soup = BeautifulSoup(resp.content, "html5lib")
-        urls = []
-        url_list = urls_soup.find_all('div', attrs={'class': 'search_result_single'})
-
-        for li in url_list:
-            url = li.find('a')['href']
-            urls.append(url)
-
-        return urls
-
-
-    def parse_url_content(self, url, url_id):
+    def parse_company_info(self, url, url_id):
         print('Connect: GET %s' % url)
         resp = self.req_get(url)
 
@@ -119,8 +61,6 @@ class Scrawler(object):
         self.soup = BeautifulSoup(resp.content, "html5lib")
         self.url_id = url_id
 
-
-    def parse_company_info(self):
         data = [['url_id', 'company_name', 'company_address', 'company_intro', 'company_status']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
         company_name = header.h1.get_text()
@@ -218,6 +158,42 @@ class Scrawler(object):
             data.append([self.url_id, company_name, '-', '-', '-', '-', '-', '-'])
 
         return data
+
+
+
+    def set_proxy(self):
+        url = "http://piping.mogumiao.com/proxy/api/get_ip_al?appKey=3873239366fb4548a227fcbf310862ba&count=1&expiryDate=0&format=1&newLine=2"
+        resp = self.session.get(url)
+        if resp.status_code == 200:
+            resp_json = json.loads(resp.text)
+            proxy_ip = resp_json['msg'][0]['ip']
+            proxy_port = resp_json['msg'][0]['port']
+            proxy_meta = "%(ip)s:%(port)s" % {
+                "ip" : proxy_ip,
+                "port" : proxy_port,
+            }
+            proxies = {
+                "http"  : "http://" + proxy_meta,
+                "https" : "https://" + proxy_meta,
+            }
+            self.proxies = proxies
+            print("Connect: Set Proxy %s" % proxy_meta)
+            print()
+        else:
+            raise Exception
+
+
+    def get_current_ip(self):
+        url = "https://httpbin.org/ip"
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36',
+        }
+        resp = requests.get(url, headers=headers, proxies=self.proxies, timeout=10)
+        print("Connect: Current IP %s" % resp.text.strip())
+        return resp
+
+
+    
 
 
 
