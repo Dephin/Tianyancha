@@ -13,11 +13,7 @@ class Scrawler(object):
     """docstring for  Scrawler"""
     def __init__(
         self,
-        cookies={},
-        proxy_host="", 
-        proxy_port="", 
-        proxy_user="", 
-        proxy_pass=""
+        cookies=""
     ):
         self.session = requests.session()
         # self.session.keep_alive = False
@@ -30,19 +26,27 @@ class Scrawler(object):
             'Referer': 'https://www.tianyancha.com/',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
+            'cookie': cookie,
         }
         self.soup = None
         self.url_id = None
         self.proxies = None
-        self.cookies = cookies
-        self.cookie_num = 0
         self.set_proxy()
-        self.set_cookie()
+
+
+    scrawler_num = 0
+
+
+    @classmethod
+    def build_scrawler(cls, cookies):
+        s = cls(cookies[cls.scrawler_num])
+        cls.scrawler_num += 1
+        return s
 
 
     def set_proxy(self):
-        url = "http://piping.mogumiao.com/proxy/api/get_ip_al?appKey=fede78e789e747ecaabbf1a442089de3&count=1&expiryDate=0&format=1&newLine=2"
-        resp = requests.get(url)
+        url = "http://piping.mogumiao.com/proxy/api/get_ip_al?appKey=3873239366fb4548a227fcbf310862ba&count=1&expiryDate=0&format=1&newLine=2"
+        resp = self.session.get(url)
         if resp.status_code == 200:
             resp_json = json.loads(resp.text)
             proxy_ip = resp_json['msg'][0]['ip']
@@ -62,11 +66,14 @@ class Scrawler(object):
             raise Exception
 
 
-    def set_cookie(self):
-        self.headers['cookie'] = self.cookies[self.cookie_num]
-        self.cookie_num += 1
-        if self.cookie_num >= len(self.cookies):
-            self.cookie_num = 0
+    # def set_cookie(self):
+    #     self.headers['cookie'] = self.cookies[Scrawler.scrawler_num]
+    #     Scrawler.scrawler_num += 1
+    #     if Scrawler.scrawler_num >= len(self.cookies):
+    #         Scrawler.scrawler_num = 0
+
+    def set_cookie(self, cookie):
+        self.headers['cookie'] = cookie
 
 
     def get_current_ip(self):
@@ -80,7 +87,7 @@ class Scrawler(object):
 
 
     def req_get(self, url):
-        resp = self.session.get(url, headers=self.headers, proxies=self.proxies, timeout=10)
+        resp = requests.get(url, headers=self.headers, proxies=self.proxies, timeout=10)
         return resp
 
 
@@ -211,3 +218,7 @@ class Scrawler(object):
             data.append([self.url_id, company_name, '-', '-', '-', '-', '-', '-'])
 
         return data
+
+
+
+
