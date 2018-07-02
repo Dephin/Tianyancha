@@ -5,18 +5,15 @@ import requests
 import urllib
 import json
 import hashlib
+import time
 
 from bs4 import BeautifulSoup
 
 
 class ScrawlContents(object):
     """docstring for  Scrawler"""
-    def __init__(
-        self,
-        cookie="",
-        proxies={}
-    ):
-        self.session = requests.session()
+    def __init__(self):
+        # self.session = requests.session()
         # self.session.keep_alive = False
         self.headers = {
             'Host': 'www.tianyancha.com',
@@ -27,11 +24,11 @@ class ScrawlContents(object):
             'Referer': 'https://www.tianyancha.com/',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
-            'cookie': cookie,
         }
         self.soup = None
+        self.url = None
         self.url_id = None
-        self.proxies = proxies 
+        self.proxies = None 
 
     SCRAWLER_NUM = 0
 
@@ -43,23 +40,31 @@ class ScrawlContents(object):
 
     def set_cookie(self, cookie):
         self.headers['cookie'] = cookie
+        print("Connect: Reset Cookie")
 
     def set_proxies(self, proxies):
         self.proxies = proxies
+        print("Connect: Set Proxies %s" % proxies["https"])
+
+    def set_url(self, url):
+        self.url = url
+
+    def set_url_id(self, url_id):
+        self.url_id = url_id
 
     def req_get(self, url):
         resp = requests.get(url, headers=self.headers, proxies=self.proxies, timeout=10)
         return resp
 
 
-    def parse_company_info(self, url, url_id):
-        print('Connect: GET %s' % url)
-        resp = self.req_get(url)
+
+    def parse_company_info(self):
+        print('Connect: GET %s' % self.url)
+        resp = self.req_get(self.url)
 
         print('Parsing: Company Info')
         print()
         self.soup = BeautifulSoup(resp.content, "html5lib")
-        self.url_id = url_id
 
         data = [['url_id', 'company_name', 'company_address', 'company_intro', 'company_status']]
         header = self.soup.find('div', attrs={'class': 'company_header_width'})
