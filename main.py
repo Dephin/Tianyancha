@@ -1,45 +1,23 @@
-#! /usr/local/bin/python3
-#coding: utf-8
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# @Time    : main.py
+# @Author  : dephin
+# @File    : 2018/7/8
 
-import time
-from task import Task
-from config import db_conf, cookies
+from controller import Controller
 
 
 def main():
-    try:
-        t = Task(db_conf=db_conf)
-        run(t)
-    except:
-        main()
-
-
-
-def run(t):
-    for i in range(0, 1000):
-        p1 = t.get_proxies()
-        t.run(p1, cookies[0])
-        time.sleep(5)
-        p2 = t.get_proxies()
-        t.run(p2, cookies[1])
-        time.sleep(5)
-        p3 = t.get_proxies()
-        t.run(p3, cookies[2])
-        time.sleep(1)
-
-        for j in range(1,10):
-            t.run(p1, cookies[0])
-            t.run(p2, cookies[1])
-            t.run(p3, cookies[2])
-            time.sleep(1)
-
-        time.sleep(60)
-
-
+	c = Controller()
+	c.run()
 
 
 if __name__ == '__main__':
-    main()
-    # t = Task(db_conf=db_conf)
-    # run(t)
-    # test()
+	# main()
+	pass
+	# d1 = {'a': 1, 'b': 2}
+	# d2 = {'c': 3}
+	# d1.setdefault('d',2)
+	# d2.update(d1)
+	# d3 = dict(d1)
+	# print(d1)
